@@ -81,16 +81,61 @@ def remove_e_rules(rules):
                 if any(x in V for x in rule):
                     for combo in index_combinations:
                         new_rule = "".join([rule[j] for j in range(len(rule)) if j not in combo])
-                        if new_rule: 
+                        if new_rule and new_rule != key: 
                             temp.add(new_rule)
         
         # remove '0' rules
         rules[key] = {x for x in rules[key] if x != '0'}
         if temp:
-            rules[key] |= temp
+            rules[key].update(temp)
 
 
     return rules
 
+ 
+def remove_useless_rules(rules):
+    terminal_set = set()
+
+    for key, value in rules.items():
+       for rule in value:
+           if len(get_nonterminals(rule)) == 0:
+             terminal_set.add(key)
+
+    for key, value in rules.items():
+       for rule in value:
+           if len(rule) == 1 and rule in terminal_set:
+             terminal_set.add(key)         
+
+    removed_keys = []
+
+    for key, value in rules.items():
+        removed_rule = []
+        for rule in value: 
+           for variable in get_nonterminals(rule):
+               if variable not in terminal_set:
+                   removed_rule.append(rule)
+                   break
+
+        for r in removed_rule:
+            value.remove(r)
+        if len(value) == 0:
+            removed_keys.append(key)
+    
+    for key in removed_keys:
+        del rules[key]
+                     
+    return rules
+
+
 rules = get_input()
 print(remove_e_rules(rules))
+print(remove_useless_rules(rules))
+
+
+
+
+
+
+              
+
+
