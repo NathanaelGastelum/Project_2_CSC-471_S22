@@ -1,7 +1,5 @@
 import argparse
-import enum
-from multiprocessing.sharedctypes import Value
-from traceback import print_tb
+from re import S
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_file")
@@ -94,6 +92,7 @@ def remove_e_rules(rules):
 
  
 def remove_useless_rules(rules):
+    # handle non terminating variables
     terminal_set = set()
 
     for key, value in rules.items():
@@ -102,9 +101,9 @@ def remove_useless_rules(rules):
              terminal_set.add(key)
 
     for key, value in rules.items():
-       for rule in value:
-           if len(rule) == 1 and rule in terminal_set:
-             terminal_set.add(key)         
+        for rule in value:
+            if set(get_nonterminals(rule)).issubset(terminal_set):
+               terminal_set.add(key)
 
     removed_keys = []
 
@@ -123,6 +122,22 @@ def remove_useless_rules(rules):
     
     for key in removed_keys:
         del rules[key]
+
+    # handle unreachable variables
+    reachable = {'S'}
+    current_len = 0
+
+    for rule in rules['S']:
+        reachable.update(get_nonterminals(rule))
+
+    while current_len != len(reachable):
+        current_len = len(reachable)
+        
+        for key in reachable:
+            for rule in rules[key]:
+                reachable.update(get_nonterminals(rule))
+    
+    rules = {key: rules[key] for key in rules.keys() if key in reachable}
                      
     return rules
 
