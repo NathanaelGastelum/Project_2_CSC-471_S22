@@ -12,7 +12,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["Test_2.txt"]
+            "args": ["Test_3.txt"]
         }
     ]
 }

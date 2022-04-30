@@ -13,7 +13,7 @@ def get_input():
         for line in file:
             line = line.split("-", maxsplit=1)
 
-            rules[line[0]] = line[1].strip().split("|")
+            rules[line[0]] = set(line[1].strip().split("|"))
 
     return rules
 
@@ -43,17 +43,20 @@ def get_powerset(V):
 def remove_e_rules(rules):
     removed = set()
 
-    for rule in rules.items():
-        if len(rule[1]) == 1:
-            if rule[1][0] == '0':
-                removed.add(rule[0])
-    
-    for key in removed:
-        rules.pop(key)
-
     for key, value in rules.items():
-        for i, subrule in enumerate(value):
-            rules[key][i] = "".join([x for x in subrule if x not in removed])
+        if len(rules[key]) == 1:
+            if '0' in rules[key]:
+                removed.add(key)
+    
+    # remove null Variables
+    for key in removed:
+        del rules[key]
+
+    # removes null units from rules
+    for key, value in rules.items():
+        for subrule in value:
+            rules[key].remove(subrule)
+            rules[key].add("".join([x for x in subrule if x not in removed]))
 
     V = set()
     for key, value in rules.items():
@@ -68,7 +71,7 @@ def remove_e_rules(rules):
                 V.add(key)
 
     for key, value in rules.items():
-        temp = []
+        temp = set()
         
         for i, rule in enumerate(value):
             index_set = {j for j in range(len(rule)) if rule[j] in V}
@@ -77,11 +80,14 @@ def remove_e_rules(rules):
             if rule != '0':
                 if any(x in V for x in rule):
                     for combo in index_combinations:
-                        temp.append("".join([rule[j] for j in range(len(rule)) if j not in combo]))
+                        new_rule = "".join([rule[j] for j in range(len(rule)) if j not in combo])
+                        if new_rule: 
+                            temp.add(new_rule)
         
-        rules[key] = [x for x in rules[key] if x != '0']
+        # remove '0' rules
+        rules[key] = {x for x in rules[key] if x != '0'}
         if temp:
-            rules[key] += temp # TODO: handle duplicates/rules that don't need multiple combinations
+            rules[key] |= temp
 
 
     return rules
