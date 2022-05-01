@@ -1,5 +1,4 @@
 import argparse
-from re import S
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_file")
@@ -15,7 +14,6 @@ def get_input():
 
     return rules
 
-print(get_input())
 
 def get_nonterminals(rule):
     nonterminals = []
@@ -37,6 +35,7 @@ def get_powerset(V):
                 powerset[i].append(node_set[j])
 
     return powerset
+
 
 def remove_e_rules(rules):
     removed = set()
@@ -142,15 +141,20 @@ def remove_useless_rules(rules):
     return rules
 
 
-rules = get_input()
-print(remove_e_rules(rules))
-print(remove_useless_rules(rules))
+def print_output(cfg):
+    cfg = remove_e_rules(cfg)
+    cfg = remove_useless_rules(cfg)
+    
+    for key, value in cfg.items():
+        string_builder = []
+        string_builder.append(f"{key}-")
+
+        for i, rule in enumerate(value):
+            if i > 0:
+                string_builder.append("|")
+            string_builder.append(f"{rule}")
+
+        print("".join(string_builder))
 
 
-
-
-
-
-              
-
-
+print_output(get_input())

@@ -1,0 +1,4 @@
+S-a|aA|ABB
+A-aa|aaA
+B-bB|bbC
+C-B
